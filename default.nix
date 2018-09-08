@@ -15,6 +15,7 @@ stdenv.mkDerivation {
   buildInputs = [
     glibcLocales # for character support (unicode etc)
     glfw
+    portaudio
     zlib
 
     (python36.buildEnv.override {  
@@ -24,10 +25,11 @@ stdenv.mkDerivation {
       extraLibs = [    
 	python36Full
 	python36Packages.cffi
-	python36Packages.virtualenv
+	python36Packages.sounddevice
 	python36Packages.pip
 	python36Packages.pillow
-
+	python36Packages.pyopengl
+	python36Packages.virtualenv
       ];
     })
   ];
@@ -37,7 +39,7 @@ stdenv.mkDerivation {
     export LANG=en_US.UTF-8
     virtualenv venv
     source venv/bin/activate
-    export LD_LIBRARY_PATH=${glfw}/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${glfw}/lib:${portaudio}/lib:$LD_LIBRARY_PATH
     pip install glfw
     python setup.py develop
     export PATH=$PWD/venv/bin:$PATH
