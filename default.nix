@@ -9,17 +9,29 @@
 
 with import <nixpkgs> {};
 with pkgs.python36Packages;
-let pyBasePkg = stdenv.mkDerivation {
+stdenv.mkDerivation {
   name = "impurePythonEnv";
 
   buildInputs = [
     glibcLocales # for character support (unicode etc)
     glfw
-    zlib  
+    zlib
+
+    (python36.buildEnv.override {  
+      #
+      # these packages are required for virtualenv and pip to work:
+      #
+      extraLibs = [    
+	python36Full
+	python36Packages.cffi
+	python36Packages.virtualenv
+	python36Packages.pip
+	python36Packages.pillow
+
+      ];
+    })
   ];
-};
-in (python36.buildEnv.override {
-  postBuild = ''
+  shellHook = ''
     # set SOURCE_DATE_EPOCH so that we can use python wheels
     SOURCE_DATE_EPOCH=$(date +%s)
     export LANG=en_US.UTF-8
@@ -31,18 +43,6 @@ in (python36.buildEnv.override {
     export PATH=$PWD/venv/bin:$PATH
     export PYTHONPATH=$PWD
   '';
-  
-    #
-    # these packages are required for virtualenv and pip to work:
-    #
-  extraLibs = [    
-    pyBasePkg
-    python36Full
-    python36Packages.cffi
-    python36Packages.virtualenv
-    python36Packages.pip
-    python36Packages.pillow
+}
 
-  ];
-}).env
 
